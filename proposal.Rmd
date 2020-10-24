@@ -8,8 +8,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Team Members:  Elizabeth Balke, Caleb Purcell, Kordell Schrock, Patrick Wenzel
-### Project Coordinator: Elizabeth Balke
+### Team Members:  Elisabeth Balke, Caleb Purcell, Kordell Schrock, Patrick Wenzel
+### Project Coordinator: Elisabeth Balke
 
 ## Data Set URL(s)
 
