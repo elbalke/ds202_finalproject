@@ -1,0 +1,23 @@
+---
+title: "proposal.Rmd"
+date: "10/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Team Members:  Elizabeth Balke, Caleb Purcell, Kordell Schrock, Patrick Wenzel
+### Project Coordinator: Elizabeth Balke
+
+## Data Set URL
+
+
+## Purpose of Study
+
+
+## Overview of Data Set
+
+
+## Plan for Exploratory Analysis
