@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Purpose of Study
 ### To do a data analyis of the current polls and see which canidate is wining. Also, look at the 
-### current sentiment of tweets for each canidate through data mining. 
+### current sentiment of tweets for each canidate through data mining. This will help us discover which candidate is more likely to be approved for 2020 presidental elections.
 
 ## Overview of Data Set
 ### kaggle has the twitter data, this shows tweets, hashtags, retweets, and favorites.
@@ -26,4 +26,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Twitter API we will use to data mine tweets instantly when we run a funtion within R. 
 
 ## Plan for Exploratory Analysis
-### Use twitter API for data mining of sentiment analysis. Also, use the other datas from kaggle to look more in depth of the tweets. Also, look at fivethirtyeight of prediction models of the elcetion for 2020.
+### We will use the following questions for our analysis:
+
+### 1.What is the current sentiment for Biden and Trump from regular twitter users?
+### 2.What do Biden and Trump most tweet about? Are their tweets positive or negative in sentiment? 
+### 3.From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
+### 4.Which states are currently republican or democrat?
+### 5.What topics to both canidates talk about?
+### 6.Who has more retweets and favorites for their tweets?
+### 7.What are the common hashtags used between Biden and Trump?
