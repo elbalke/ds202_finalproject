@@ -12,13 +12,18 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Project Coordinator: Elisabeth Balke
 
 ## Data Set URL(s)
-
+### https://www.kaggle.com/austinreese/trump-tweets
+###  https://www.kaggle.com/rohanrao/joe-biden-tweets/version/2
+### https://github.com/fivethirtyeight/data/blob/master/congress-generic-ballot/README.md
 
 ## Purpose of Study
-
+### To do a data analyis of the current polls and see which canidate is wining. Also, look at the 
+### current sentiment of tweets for each canidate through data mining. 
 
 ## Overview of Data Set
-
+### kaggle has the twitter data, this shows tweets, hashtags, retweets, and favorites.
+### fivethirtyeight github datasets show the model of prediction the outcome of the 2020 elections. They use multiple models from different pollsters that have different weights and grade.
+### Twitter API we will use to data mine tweets instantly when we run a funtion within R. 
 
 ## Plan for Exploratory Analysis
-
+### Use twitter API for data mining of sentiment analysis. Also, use the other datas from kaggle to look more in depth of the tweets. Also, look at fivethirtyeight of prediction models of the elcetion for 2020.
