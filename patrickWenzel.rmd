@@ -13,6 +13,7 @@ library(dplyr)
 library(lubridate)
 library(tidyverse)
 library(readxl)
+library(expss)
 library(ggrepel)
 bidenTweets <- read.csv("JoeBidenTweets.csv")
 trumpTweets <- read.csv("realdonaldtrump.csv")
@@ -56,12 +57,14 @@ trumpHashtags <- unlist(strsplit(trumpTweets$hashtags, ','))
 trumpHashtags <- tibble(trumpHashtags)
 trumpHashtags <- unique(trumpHashtags$trumpHashtags)
 trumpHashtags <- tibble(trumpHashtags)
-trumpHashtags
+
+bidenHashtags <- unlist(strsplit(bidenTweets$hashtags, ','))
+bidenHashtags <- tibble(bidenHashtags)
+bidenHashtags <- unique(bidenHashtags$bidenHashtags)
+bidenHashtags <- tibble(bidenHashtags)
+hashtagJoin <- inner_join(trumpHashtags, bidenHashtags, by = c('trumpHashtags' = 'bidenHashtags'))
+colnames(hashtagJoin) <- c('hashtag')
+print(as_tibble(hashtagJoin), n = 29)
 ```
 
-
-
-
-
-
-
+    Based off of these findings, it seems like the majority of commonalities between the two candidates' hashtag usage is that most of them seem to either be a holiday, a day celebrating a person or group of people, standing in solidarity after a tragedy (for example #VegasStrong), or an election. 

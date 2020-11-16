@@ -428,21 +428,47 @@ ggplot(candidatesTweetData, aes(x = name, y = totalRetweets)) + geom_bar(stat=&q
 trumpHashtags &lt;- tibble(trumpHashtags)
 trumpHashtags &lt;- unique(trumpHashtags$trumpHashtags)
 trumpHashtags &lt;- tibble(trumpHashtags)
-trumpHashtags</code></pre>
-<pre><code>## # A tibble: 2,329 x 1
-##    trumpHashtags             
-##    &lt;chr&gt;                     
-##  1 #EvanForSI                
-##  2 #TrumpRoast               
-##  3 #1                        
-##  4 #Indy500                  
-##  5 #trumpvlog                
-##  6 #VEGASusa11               
-##  7 #MissUSA                  
-##  8 #celebrityapprenticefinale
-##  9 #trumpdocumentary         
-## 10 #TeenUSA                  
-## # ... with 2,319 more rows</code></pre>
+
+bidenHashtags &lt;- unlist(strsplit(bidenTweets$hashtags, &#39;,&#39;))
+bidenHashtags &lt;- tibble(bidenHashtags)
+bidenHashtags &lt;- unique(bidenHashtags$bidenHashtags)
+bidenHashtags &lt;- tibble(bidenHashtags)
+hashtagJoin &lt;- inner_join(trumpHashtags, bidenHashtags, by = c(&#39;trumpHashtags&#39; = &#39;bidenHashtags&#39;))
+colnames(hashtagJoin) &lt;- c(&#39;hashtag&#39;)
+print(as_tibble(hashtagJoin), n = 29)</code></pre>
+<pre><code>## # A tibble: 29 x 1
+##    hashtag                
+##    &lt;chr&gt;                  
+##  1 #VPDebate              
+##  2 #2                     
+##  3 #TBT                   
+##  4 #NHPolitics            
+##  5 #HappyFathersDay       
+##  6 #Barcelona             
+##  7 #FF                    
+##  8 #VeteransDay           
+##  9 #TheView               
+## 10 #SOTU                  
+## 11 #Colombia              
+## 12 #RebuildAmerica        
+## 13 #DemDebate             
+## 14 #DDay                  
+## 15 #DemsInPhilly          
+## 16 #LaborDay              
+## 17 #debatenight           
+## 18 #ElectionDay           
+## 19 #MemorialDay           
+## 20 #MadeInAmerica         
+## 21 #PuertoRico            
+## 22 #VegasStrong           
+## 23 #SmallBusinessSaturday 
+## 24 #InternationalWomensDay
+## 25 #MLK50                 
+## 26 #PurpleHeartDay        
+## 27 #MLKDay                
+## 28 #NC09                  
+## 29 #NationalDoctorsDay</code></pre>
+<pre><code>Based off of these findings, it seems like the majority of commonalities between the two candidates&#39; hashtag usage is that most of them seem to either be a holiday, a day celebrating a person or group of people, standing in solidarity after a tragedy (for example #VegasStrong), or an election. </code></pre>
 </div>
 
 
