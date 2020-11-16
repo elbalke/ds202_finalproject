@@ -1,5 +1,5 @@
 ---
-title: "DS 202 Final Project Q6&7"
+title: "DS 202 Final Project Q3/6/7"
 author: "Patrick Wenzel"
 date: "11/13/2020"
 output: html_document
@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(dplyr.summarise.inform = FALSE)
+options(dplyr.tibble.inform = FALSE)
 library(ggplot2)
 library(stringr)
 library(dplyr)
@@ -17,7 +19,25 @@ library(expss)
 library(ggrepel)
 bidenTweets <- read.csv("JoeBidenTweets.csv")
 trumpTweets <- read.csv("realdonaldtrump.csv")
+poll <- read.csv("statepredictions.csv")
+colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'electoralVotes')
 ```
+
+## 3. From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
+```{r}
+bidenElectoralVotes <- poll %>%
+                            filter(bidenPercent > trumpPercent)
+trumpElectoralVotes <- poll %>%
+                            filter(trumpPercent > bidenPercent)
+name <- c('Trump', 'Biden')
+totalVotes <- c(sum(trumpElectoralVotes$electoralVotes), sum(bidenElectoralVotes$electoralVotes))
+
+candidatePredictions <- data.frame(name, totalVotes)
+
+ggplot(candidatePredictions, aes(x = name, y = totalVotes, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Predicted Electoral Votes per Candidate') + xlab('Candidate') + ylab('Total Number of Predicted Electoral Votes') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=totalVotes), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 300)
+```
+
+    By this graph, we can predict that Biden is likely to win 277-261 votes. Although the actual counts differ than what it turned out to be, the prediction for the president turned out to be correct.
 
 ## 6.Who has more retweets and favorites for their tweets?
 ```{r}
@@ -34,17 +54,25 @@ trumpGroup <- trumpTweets %>% summarise(
                           TrumpAverageFavorites = mean(favorites),
                           TrumpNumTweets = n()
 )
-name <- c('Trump', 'Biden')
+
 totalRetweets <- c(trumpGroup$TrumpTotalRetweets, bidenGroup$BidenTotalRetweets)
 totalFavorites <- c(trumpGroup$TrumpTotalFavorites, bidenGroup$BidenTotalFavorites)
 averageRetweets <- c(trumpGroup$TrumpAverageRetweets, bidenGroup$BidenAverageRetweets)
 averageFavorites <- c(trumpGroup$TrumpAverageFavorites, bidenGroup$BidenAverageFavorites)
 numberOfTweets <- c(trumpGroup$TrumpNumTweets, bidenGroup$BidenNumTweets)
 candidatesTweetData <- data.frame(name, totalRetweets, totalFavorites, averageRetweets, averageFavorites, numberOfTweets)
-ggplot(candidatesTweetData, aes(x = name, y = totalRetweets)) + geom_bar(stat="identity") + ggtitle('Total Number of Retweets per Candidate') + xlab('Candidate') + ylab('Total Number of Retweets')
-ggplot(candidatesTweetData, aes(x = name, y = totalFavorites)) + geom_bar(stat="identity") + ggtitle('Total Number of Favorites per Candidate') + xlab('Candidate') + ylab('Total Number of Favorites')
-ggplot(candidatesTweetData, aes(x = name, y = averageRetweets)) + geom_bar(stat="identity") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Retweets')
-ggplot(candidatesTweetData, aes(x = name, y = averageFavorites)) + geom_bar(stat="identity") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Favorites')
+
+ggplot(candidatesTweetData, aes(x = name, y = numberOfTweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Tweets per Candidate') + xlab('Candidate') + ylab('Total Number of Tweets') +
+scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=numberOfTweets), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 45000)
+
+ggplot(candidatesTweetData, aes(x = name, y = totalRetweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Retweets per Candidate') + xlab('Candidate') + ylab('Total Number of Retweets') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=totalRetweets), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 280000000)
+
+ggplot(candidatesTweetData, aes(x = name, y = totalFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Favorites per Candidate') + xlab('Candidate') + ylab('Total Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=totalFavorites), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 1175000000)
+
+ggplot(candidatesTweetData, aes(x = name, y = averageRetweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Retweets') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageRetweets, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 6400)
+
+ggplot(candidatesTweetData, aes(x = name, y = averageFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageFavorites, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 34000)
+
 candidatesTweetData
 ```
 
@@ -55,16 +83,29 @@ candidatesTweetData
 ```{r}
 trumpHashtags <- unlist(strsplit(trumpTweets$hashtags, ','))
 trumpHashtags <- tibble(trumpHashtags)
+allTrumpHashtags <- trumpHashtags
 trumpHashtags <- unique(trumpHashtags$trumpHashtags)
 trumpHashtags <- tibble(trumpHashtags)
 
 bidenHashtags <- unlist(strsplit(bidenTweets$hashtags, ','))
 bidenHashtags <- tibble(bidenHashtags)
+allBidenHashtags <- bidenHashtags
 bidenHashtags <- unique(bidenHashtags$bidenHashtags)
 bidenHashtags <- tibble(bidenHashtags)
 hashtagJoin <- inner_join(trumpHashtags, bidenHashtags, by = c('trumpHashtags' = 'bidenHashtags'))
 colnames(hashtagJoin) <- c('hashtag')
 print(as_tibble(hashtagJoin), n = 29)
+
+colnames(allBidenHashtags) <- c('hashtag')
+colnames(allTrumpHashtags) <- c('hashtag')
+allHashtags <- rbind(allBidenHashtags, allTrumpHashtags)
+allHashtags <- allHashtags %>%
+                    group_by(hashtag) %>%
+                    summarise(timesUsed = n())
+top5Hashtags <- inner_join(allHashtags, hashtagJoin, by = c('hashtag')) %>%
+                        arrange(-timesUsed) %>%
+                        head(5)
+ggplot(top5Hashtags, aes(x = hashtag, y = timesUsed, fill = hashtag)) + geom_bar(stat="identity") + coord_flip() +  ggtitle('Times Used Between Candidates') + xlab('hashtag') + ylab('Top Five Hashtags Used Between the Two Candidates')
 ```
 
-    Based off of these findings, it seems like the majority of commonalities between the two candidates' hashtag usage is that most of them seem to either be a holiday, a day celebrating a person or group of people, standing in solidarity after a tragedy (for example #VegasStrong), or an election. 
+    Based off of these findings, it seems like the majority of commonalities between the two candidates' hashtag usage is that most of them seem to either be a holiday, a day celebrating a person or group of people, standing in solidarity after a tragedy (for example #VegasStrong), or an election. Although #DemDebate is the most popular hashtag, with over 220 usages between the two candidates, Biden has used that hashtag 201 times so he has used it a majority of the time.

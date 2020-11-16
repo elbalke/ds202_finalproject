@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Data Set URL(s)
 ### https://www.kaggle.com/austinreese/trump-tweets
 ###  https://www.kaggle.com/rohanrao/joe-biden-tweets/version/2
-### https://github.com/fivethirtyeight/data/blob/master/congress-generic-ballot/README.md
+### https://www.kcore-analytics.com/usa-election/
 
 ## Purpose of Study
 ### To do a data analyis of the current polls and see which canidate is wining. Also, look at the 
