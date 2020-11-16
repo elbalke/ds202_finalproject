@@ -424,6 +424,25 @@ ggplot(candidatesTweetData, aes(x = name, y = totalRetweets)) + geom_bar(stat=&q
 </div>
 <div id="what-are-the-common-hashtags-used-between-biden-and-trump" class="section level2">
 <h2>7.What are the common hashtags used between Biden and Trump?</h2>
+<pre class="r"><code>trumpHashtags &lt;- unlist(strsplit(trumpTweets$hashtags, &#39;,&#39;))
+trumpHashtags &lt;- tibble(trumpHashtags)
+trumpHashtags &lt;- unique(trumpHashtags$trumpHashtags)
+trumpHashtags &lt;- tibble(trumpHashtags)
+trumpHashtags</code></pre>
+<pre><code>## # A tibble: 2,329 x 1
+##    trumpHashtags             
+##    &lt;chr&gt;                     
+##  1 #EvanForSI                
+##  2 #TrumpRoast               
+##  3 #1                        
+##  4 #Indy500                  
+##  5 #trumpvlog                
+##  6 #VEGASusa11               
+##  7 #MissUSA                  
+##  8 #celebrityapprenticefinale
+##  9 #trumpdocumentary         
+## 10 #TeenUSA                  
+## # ... with 2,319 more rows</code></pre>
 </div>
 
 

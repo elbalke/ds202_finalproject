@@ -50,3 +50,18 @@ candidatesTweetData
     Based on this data and the graphs, Trump has a significant more amount of retweets and favorites than Biden. However, Trump also has 37,576 more tweets than Biden. We looked into when the data sets were most recently updated and what date range the tweets were collected. The dataset we used for Trump's tweets had tweets from May 4th, 2009 through June 30th, 2020. There are 9 total years in this dataset. The dataset we used for Biden's tweets had tweets from April 9th, 2012 through April 30th, 2020 along with two tweets from 2007. There are 9 total years in this dataset. Although Trump's dataset started earlier, most of the tweets were from 2011 on and since Trump tweets an average of 3,612.67 times a year and Biden tweets an average of 641.78 times a year, I don't think having another year of Biden's tweets would make a big enough of a difference to get the counts closer to each other. Below will be an analyses of the average tweets per year each candidate tweeted. Although Trump has tweeted many more times, he barely has more average retweets per tweet than Biden and Biden actually has more average favorites than Trump.
 
 ## 7.What are the common hashtags used between Biden and Trump?
+
+```{r}
+trumpHashtags <- unlist(strsplit(trumpTweets$hashtags, ','))
+trumpHashtags <- tibble(trumpHashtags)
+trumpHashtags <- unique(trumpHashtags$trumpHashtags)
+trumpHashtags <- tibble(trumpHashtags)
+trumpHashtags
+```
+
+
+
+
+
+
+
