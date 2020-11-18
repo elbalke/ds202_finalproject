@@ -1,0 +1,50 @@
+---
+title: "Elisabeth Balke"
+author: "Elisabeth Balke"
+date: "11/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+**Create variable lists**
+```{r}
+region <- c("alabama","alaska", "arizona", "arkansas", "california",  "colorado", "connecticut", "delaware",
+            "florida", "georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana",
+           "maine","maryland", "massachusetts", "michigan", "minnesota", "mississippi",
+           "missouri","montana","nebraska","nevada","new hampshire","new jersey","new mexico",
+           "new york","north carolina","north dakota","ohio","oklahoma","oregon","pennsylvania","rhode island",
+           "south carolina","south dakota","tennessee","texas","utah","vermont","virginia",
+           "washington","west virginia","wisconsin","wyoming")
+
+vote <- c(2,2,1,2,1,1,1,1,2,1,1,2,1,2,2,2,2,2,0,1,1,
+          1,1,2,2,2,3,1,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,1,2)
+```
+3 - nebraska split
+2 - trump
+1 - biden
+0 - maine split
+
+
+**Make data frame**
+```{r}
+states <- map_data('state')
+state_decision <- data.frame(region, vote)
+state_votes <- full_join(states, state_decision)
+```
+
+**Plot Map**
+```{r}
+ggplot(state_votes, aes(x=long, y=lat)) + 
+  geom_polygon(aes(group=group, fill= vote)) + coord_map() +
+  scale_fill_distiller(name="Vote", palette = "RdBu")+
+  labs(title="Electoral Vote by State - 2020") +
+  theme_void() +
+  coord_sf(ndiscr = F)
+```
+
+
+3 - nebraska split / 2 - trump / 1 - biden / 0 - maine split
