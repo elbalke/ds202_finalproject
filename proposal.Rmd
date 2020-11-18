@@ -32,6 +32,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ### 2.What do Biden and Trump most tweet about? Are their tweets positive or negative in sentiment? 
 ### 3.From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
 ### 4.Which states are currently republican or democrat?
-### 5.What topics to both canidates talk about?
+### 5.What topics do both canidates talk about?
 ### 6.Who has more retweets and favorites for their tweets?
 ### 7.What are the common hashtags used between Biden and Trump?

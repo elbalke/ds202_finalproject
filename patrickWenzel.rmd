@@ -23,7 +23,7 @@ poll <- read.csv("statepredictions.csv")
 colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'electoralVotes')
 ```
 
-## 3. From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
+## 3. From kcore-analytics prediction models of the election for 2020. Who is likely to win?
 ```{r}
 bidenElectoralVotes <- poll %>%
                             filter(bidenPercent > trumpPercent)
