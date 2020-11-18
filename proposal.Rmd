@@ -28,8 +28,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Plan for Exploratory Analysis
 ### We will use the following questions for our analysis:
 
-### 1.What is the current sentiment for Biden and Trump from regular twitter users?
-### 2.What do Biden and Trump most tweet about? Are their tweets positive or negative in sentiment? 
+### 1.What is the current sentiment for Biden and Trump from regular twitter users? Are the tweets positive, netural or negative in sentiment? 
+### 2.What do Biden and Trump most tweet about? 
 ### 3.From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
 ### 4.Which states are currently republican or democrat?
 ### 5.What topics do both canidates talk about?

@@ -1,0 +1,384 @@
+---
+title: "final Project"
+author: "Elisabeth Balke, Caleb Purcell, Kordell Schrock, Patrick Wenzel"
+date: "11/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(dplyr.summarise.inform = FALSE)
+options(dplyr.tibble.inform = FALSE)
+```
+
+```{r}
+library (rtweet)
+library(twitteR)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+library(dplyr)
+library(tidytext)
+library(tidyverse)
+library(textdata)
+#The get_sentiments function returns a tibble, so to take a look at what is included as “positive” and “negative” sentiment, you will need to filter. from 
+library(widyr)
+library(igraph)
+library(ggraph)
+library(data.table)
+
+library(readxl)
+library(expss)
+library(ggrepel)
+bidenTweets <- read.csv("JoeBidenTweets.csv")
+trumpTweets <- read.csv("realdonaldtrump.csv")
+poll <- read.csv("statepredictions.csv")
+colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'electoralVotes')
+
+```
+
+
+```{r}
+consumer_key <- "Mt2dzgMAOvWqU13zmdtAxovNR"
+consumer_secret <- "1CYFDynCiKvmUikEfZYffHuX1QJwqxNwko4liZmQxVXtj9N7Gk"
+access_token <- "1095430370198208512-1IyFwJEHPJpFVbGinTarjXapjQjxV3"
+access_token_secret <- "5McWrmhfBedpJMHZSDqoTMk9sGYLqrxv4MuZB0w132mIp"
+
+#Create Twitter Connection
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_token_secret)
+
+account <- "realdonaldtrump"
+account.timeline <- userTimeline(account, n=10, includeRts = TRUE)
+
+```
+```{r}
+print(account.timeline)
+```
+```{r}
+app_name ="Kordell's app to connect to R"
+create_token(app = app_name,
+             consumer_key = consumer_key,
+             consumer_secret = consumer_secret,
+             access_token = access_token,
+             access_secret = access_token_secret)
+```
+
+```{r eval = FALSE, echo = FALSE}
+
+trumpHashtags <- search_tweets(
+"#DonaldTrump", n = 10000 , retryonratelimit = TRUE
+)
+fwrite(trumpHashtags, file ="donaldTrump_TwitterAPI.csv")
+```
+
+```{r eval = FALSE, echo = FALSE}
+bidenHashtags <- search_tweets(
+"#JoeBiden", n = 10000 , retryonratelimit = TRUE
+)
+fwrite(bidenHashtags, file ="joeBiden_TwitterAPI.csv")
+```
+
+```{r}
+jobBiden <- readr::read_csv("./JoeBidenTweets.csv")
+jobBiden = jobBiden %>% select(likes, tweet)
+```
+
+```{r}
+jobBiden$stripped_text1 <- gsub("http.*","",   jobBiden$tweet)
+jobBiden$stripped_text1 <- gsub("https.*","",   jobBiden$tweet)
+jobBidenTweets <- jobBiden$stripped_text1
+head(jobBiden$stripped_text1)
+```
+
+```{r}
+# load list of stop words - from the tidytext package
+data("stop_words")
+# view first 6 words
+head(stop_words)
+```
+
+```{r}
+# remove punctuation, convert to lowercase, add id for each tweet!
+jobBiden_tweets_clean <- jobBiden %>%
+  dplyr::select(stripped_text1) %>%
+  unnest_tokens(word, stripped_text1)
+
+nrow(jobBiden_tweets_clean)
+## [1] 171074
+
+# remove stop words from your list of words
+cleaned_tweet_words <- jobBiden_tweets_clean %>%
+  anti_join(stop_words)
+
+# there should be fewer words now
+nrow(jobBiden_tweets_clean)
+## [1] 171074
+
+# plot the top 15 words -- notice any issues?
+cleaned_tweet_words %>%
+  count(word, sort = TRUE) %>%
+  top_n(35) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "blue") +
+  xlab(NULL) +
+  coord_flip() +
+      labs(y = "Count",
+      x = "Unique words",
+      title = "Count of unique words found in Joe Biden tweets",
+      subtitle = "Stop words removed from the list", caption = 'Source: Kaggle 171k Tweets')
+```
+```{r}
+donaldTrump <- readr::read_csv("./realdonaldtrump.csv")
+donaldTrump = donaldTrump %>% select(favorites, content)
+
+donaldTrump$stripped_text1 <- gsub("http.*","",   donaldTrump$content)
+donaldTrump$stripped_text1 <- gsub("https.*","",   donaldTrump$content)
+donaldTrumpTweets <- donaldTrump$stripped_text1
+head(jobBiden$stripped_text1)
+```
+
+```{r}
+# remove punctuation, convert to lowercase, add id for each tweet!
+donaldTrump_tweets_clean <- donaldTrump %>%
+  dplyr::select(stripped_text1) %>%
+  unnest_tokens(word, stripped_text1)
+
+nrow(donaldTrump_tweets_clean)
+## [1] 171074
+
+# remove stop words from your list of words
+cleaned_tweet_words <- donaldTrump_tweets_clean %>%
+  anti_join(stop_words)
+
+# there should be fewer words now
+nrow(donaldTrump_tweets_clean)
+## [1] 171074
+
+# plot the top 15 words -- notice any issues?
+cleaned_tweet_words %>%
+  count(word, sort = TRUE) %>%
+  top_n(35) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "red") +
+  xlab(NULL) +
+  coord_flip() +
+      labs(y = "Count",
+      x = "Unique words",
+      title = "Count of unique words found in Donald Trump tweets",
+      subtitle = "Stop words removed from the list", caption = 'Source: Kaggle 863k Tweets')
+```
+
+```{r}
+trumpHashtags <- readr::read_csv("./donaldTrump_TwitterAPI.csv")
+search_term <- "#DonaldTrump"
+trumpHashtags$date <- substr(trumpHashtags$created_at,1,10)
+trumpHashtags <- trumpHashtags[trumpHashtags$date == '2020-11-16',]
+head(trumpHashtags)
+```
+```{r}
+by <- 'hour'
+rtweet::ts_plot(trumpHashtags, by = by, trim = 1, col = "red") + geom_point() + 
+theme_minimal() + labs(title = paste0('Tweets mentioning "',
+search_term,'" by ',by),
+x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
+```
+```{r}
+sentiment_dataset <- get_sentiments("afinn")
+sentiment_dataset <- arrange(sentiment_dataset, value)
+```
+```{r}
+sentiment <- trumpHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
+
+sentiment_dataset <- get_sentiments("afinn")
+sentiment_dataset <- arrange(sentiment_dataset, -value)
+
+#merge
+sentiment <- merge(sentiment, sentiment_dataset, by = 'word')
+
+#clean
+sentiment$word <- NULL
+sentiment$screen_name <- NULL
+
+#get nearest hour of time for plot
+sentiment$hour <- format(round(sentiment$created_at, units="hours"), format="%H:%M")
+
+pivot <- sentiment %>%
+group_by(hour) %>%
+summarise(sentiment = mean(value))
+
+#plot
+ggplot(pivot[-1,], aes(x = hour, y = sentiment)) + geom_line(group = 1, col = "red") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term,'"'),
+subtitle = paste0(pivot$hour[2],' - ',pivot$hour[nrow(pivot)],' on ', format(sentiment$created_at[1], '%d %B %Y')),
+x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
+```
+
+```{r}
+bidenHashtags <-  readr::read_csv("./joeBiden_TwitterAPI.csv")
+search_term2 <- "#JoeBiden"
+bidenHashtags$date <- substr(bidenHashtags$created_at,1,10)
+bidenHashtags <- bidenHashtags[bidenHashtags$date == '2020-11-16',]
+head(bidenHashtags)
+```
+```{r}
+
+by <- 'hour'
+rtweet::ts_plot(bidenHashtags, by = by, trim = 1,col = "blue") + geom_point() + 
+theme_minimal() + labs(title = paste0('Tweets mentioning "',
+search_term2,'" by ',by),
+x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
+```
+```{r}
+sentiment2 <- bidenHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
+
+#merge
+sentiment2 <- merge(sentiment2, sentiment_dataset, by = 'word')
+
+#clean
+sentiment2$word <- NULL
+sentiment2$screen_name <- NULL
+
+#get nearest hour of time for plot
+sentiment2$hour <- format(round(sentiment2$created_at, units="hours"), format="%H:%M")
+
+pivot2 <- sentiment2 %>%
+group_by(hour) %>%
+summarise(sentiment2 = mean(value))
+
+#plot
+ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = "blue") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term2,'"'),
+subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
+x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
+
+
+```
+
+## 3. From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
+```{r}
+bidenElectoralVotes <- poll %>%
+                            filter(bidenPercent > trumpPercent)
+trumpElectoralVotes <- poll %>%
+                            filter(trumpPercent > bidenPercent)
+name <- c('Trump', 'Biden')
+totalVotes <- c(sum(trumpElectoralVotes$electoralVotes), sum(bidenElectoralVotes$electoralVotes))
+
+candidatePredictions <- data.frame(name, totalVotes)
+
+ggplot(candidatePredictions, aes(x = name, y = totalVotes, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Predicted Electoral Votes per Candidate') + xlab('Candidate') + ylab('Total Number of Predicted Electoral Votes') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=totalVotes), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 300)
+```
+
+    By this graph, we can predict that Biden is likely to win 277-261 votes. Although the actual counts differ than what it turned out to be, the prediction for the president turned out to be correct.
+
+## 6.Who has more retweets and favorites for their tweets?
+```{r}
+bidenGroup <- bidenTweets %>% summarise(
+                          BidenTotalRetweets = sum(bidenTweets$retweets),
+                          BidenTotalFavorites = sum(likes),
+                          BidenAverageRetweets = mean(retweets),
+                          BidenAverageFavorites = mean(likes),
+                          BidenNumTweets = n())
+trumpGroup <- trumpTweets %>% summarise(
+                          TrumpTotalRetweets = sum(retweets),
+                          TrumpTotalFavorites = sum(favorites),
+                          TrumpAverageRetweets = mean(retweets),
+                          TrumpAverageFavorites = mean(favorites),
+                          TrumpNumTweets = n()
+)
+
+totalRetweets <- c(trumpGroup$TrumpTotalRetweets, bidenGroup$BidenTotalRetweets)
+totalFavorites <- c(trumpGroup$TrumpTotalFavorites, bidenGroup$BidenTotalFavorites)
+averageRetweets <- c(trumpGroup$TrumpAverageRetweets, bidenGroup$BidenAverageRetweets)
+averageFavorites <- c(trumpGroup$TrumpAverageFavorites, bidenGroup$BidenAverageFavorites)
+numberOfTweets <- c(trumpGroup$TrumpNumTweets, bidenGroup$BidenNumTweets)
+candidatesTweetData <- data.frame(name, totalRetweets, totalFavorites, averageRetweets, averageFavorites, numberOfTweets)
+
+ggplot(candidatesTweetData, aes(x = name, y = numberOfTweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Tweets per Candidate') + xlab('Candidate') + ylab('Total Number of Tweets') +
+scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=numberOfTweets), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 45000)
+
+ggplot(candidatesTweetData, aes(x = name, y = totalRetweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Retweets per Candidate') + xlab('Candidate') + ylab('Total Number of Retweets') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=totalRetweets), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 280000000)
+
+ggplot(candidatesTweetData, aes(x = name, y = totalFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Total Number of Favorites per Candidate') + xlab('Candidate') + ylab('Total Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=totalFavorites), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 1175000000)
+
+ggplot(candidatesTweetData, aes(x = name, y = averageRetweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Retweets') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageRetweets, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 6400)
+
+ggplot(candidatesTweetData, aes(x = name, y = averageFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageFavorites, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 34000)
+
+candidatesTweetData
+```
+
+    Based on this data and the graphs, Trump has a significant more amount of retweets and favorites than Biden. However, Trump also has 37,576 more tweets than Biden. We looked into when the data sets were most recently updated and what date range the tweets were collected. The dataset we used for Trump's tweets had tweets from May 4th, 2009 through June 30th, 2020. There are 9 total years in this dataset. The dataset we used for Biden's tweets had tweets from April 9th, 2012 through April 30th, 2020 along with two tweets from 2007. There are 9 total years in this dataset. Although Trump's dataset started earlier, most of the tweets were from 2011 on and since Trump tweets an average of 3,612.67 times a year and Biden tweets an average of 641.78 times a year, I don't think having another year of Biden's tweets would make a big enough of a difference to get the counts closer to each other. Below will be an analyses of the average tweets per year each candidate tweeted. Although Trump has tweeted many more times, he barely has more average retweets per tweet than Biden and Biden actually has more average favorites than Trump.
+
+## 7.What are the common hashtags used between Biden and Trump?
+
+```{r}
+trumpHashtags <- unlist(strsplit(trumpTweets$hashtags, ','))
+trumpHashtags <- tibble(trumpHashtags)
+allTrumpHashtags <- trumpHashtags
+trumpHashtags <- unique(trumpHashtags$trumpHashtags)
+trumpHashtags <- tibble(trumpHashtags)
+
+bidenHashtags <- unlist(strsplit(bidenTweets$hashtags, ','))
+bidenHashtags <- tibble(bidenHashtags)
+allBidenHashtags <- bidenHashtags
+bidenHashtags <- unique(bidenHashtags$bidenHashtags)
+bidenHashtags <- tibble(bidenHashtags)
+hashtagJoin <- inner_join(trumpHashtags, bidenHashtags, by = c('trumpHashtags' = 'bidenHashtags'))
+colnames(hashtagJoin) <- c('hashtag')
+print(as_tibble(hashtagJoin), n = 29)
+
+colnames(allBidenHashtags) <- c('hashtag')
+colnames(allTrumpHashtags) <- c('hashtag')
+allHashtags <- rbind(allBidenHashtags, allTrumpHashtags)
+allHashtags <- allHashtags %>%
+                    group_by(hashtag) %>%
+                    summarise(timesUsed = n())
+top5Hashtags <- inner_join(allHashtags, hashtagJoin, by = c('hashtag')) %>%
+                        arrange(-timesUsed) %>%
+                        head(5)
+ggplot(top5Hashtags, aes(x = hashtag, y = timesUsed, fill = hashtag)) + geom_bar(stat="identity") + coord_flip() +  ggtitle('Times Used Between Candidates') + xlab('hashtag') + ylab('Top Five Hashtags Used Between the Two Candidates')
+```
+
+    Based off of these findings, it seems like the majority of commonalities between the two candidates' hashtag usage is that most of them seem to either be a holiday, a day celebrating a person or group of people, standing in solidarity after a tragedy (for example #VegasStrong), or an election. Although #DemDebate is the most popular hashtag, with over 220 usages between the two candidates, Biden has used that hashtag 201 times so he has used it a majority of the time.
+    
+
+**Create variable lists**
+```{r}
+region <- c("alabama","alaska", "arizona", "arkansas", "california",  "colorado", "connecticut", "delaware",
+            "florida", "georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana",
+           "maine","maryland", "massachusetts", "michigan", "minnesota", "mississippi",
+           "missouri","montana","nebraska","nevada","new hampshire","new jersey","new mexico",
+           "new york","north carolina","north dakota","ohio","oklahoma","oregon","pennsylvania","rhode island",
+           "south carolina","south dakota","tennessee","texas","utah","vermont","virginia",
+           "washington","west virginia","wisconsin","wyoming")
+
+vote <- c(2,2,1,2,1,1,1,1,2,1,1,2,1,2,2,2,2,2,0,1,1,
+          1,1,2,2,2,3,1,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,1,2)
+```
+3 - nebraska split
+2 - trump
+1 - biden
+0 - maine split
+
+
+**Make data frame**
+```{r}
+states <- map_data('state')
+state_decision <- data.frame(region, vote)
+state_votes <- full_join(states, state_decision)
+```
+
+**Plot Map**
+```{r}
+ggplot(state_votes, aes(x=long, y=lat)) + 
+  geom_polygon(aes(group=group, fill= vote)) + coord_map() +
+  scale_fill_distiller(name="Vote", palette = "RdBu")+
+  labs(title="Electoral Vote by State - 2020") +
+  theme_void() +
+  coord_sf(ndiscr = F)
+
+```
+
+
+3 - nebraska split / 2 - trump / 1 - biden / 0 - maine split   
+
