@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
 library(tidyverse)
 ```
 
@@ -23,28 +24,39 @@ region <- c("alabama","alaska", "arizona", "arkansas", "california",  "colorado"
 vote <- c(2,2,1,2,1,1,1,1,2,1,1,2,1,2,2,2,2,2,0,1,1,
           1,1,2,2,2,3,1,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,1,2)
 ```
-3 - nebraska split
-2 - trump
-1 - biden
-0 - maine split
+
+    3 - Nebraska split
+    2 - Trump
+    1 - Biden
+    0 - Maine split
 
 
 **Make data frame**
-```{r}
+```{r, message=FALSE, warning=FALSE}
 states <- map_data('state')
 state_decision <- data.frame(region, vote)
 state_votes <- full_join(states, state_decision)
 ```
 
 **Plot Map**
-```{r}
-ggplot(state_votes, aes(x=long, y=lat)) + 
-  geom_polygon(aes(group=group, fill= vote)) + coord_map() +
-  scale_fill_distiller(name="Vote", palette = "RdBu")+
-  labs(title="Electoral Vote by State - 2020") +
-  theme_void() +
-  coord_sf(ndiscr = F)
+```{r, message=FALSE, warning=FALSE}
+ggplot(state_votes, aes(x = long, y = lat)) + 
+  geom_polygon(aes(group = group)) +
+  geom_polygon(state_votes, mapping = aes(x = long, y = lat, group = group, fill = factor(vote))) + 
+  geom_path(aes(group = group), color = 'white') + 
+  scale_fill_manual(labels = c('Biden/Trump Split', 'Biden', 'Trump', 'Trump/Biden Split', ''), values=c('#617bfa', "#2641c9", "#c92626", '#f07878')) +
+  coord_map() + 
+  ggtitle('Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'Total Accidents') + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
 ```
 
-
-3 - nebraska split / 2 - trump / 1 - biden / 0 - maine split
+    Nebraska split:
+       Trump: 4 Electoral Votes
+       Biden: 1 Electoral Vote
+     
+    Maine Split:
+       Trump: 1 Electoral Vote
+       Biden: 3 Electoral Votes
