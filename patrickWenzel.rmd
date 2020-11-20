@@ -24,7 +24,7 @@ colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'el
 ```
 
 ## 3. From kcore-analytics prediction models of the election for 2020. Who is likely to win?
-```{r}
+```{r, message=FALSE, warning=FALSE}
 bidenElectoralVotes <- poll %>%
                             filter(bidenPercent > trumpPercent)
 trumpElectoralVotes <- poll %>%
@@ -38,6 +38,26 @@ ggplot(candidatePredictions, aes(x = name, y = totalVotes, fill = name)) + geom_
 ```
 
     By this graph, we can predict that Biden is likely to win 277-261 votes. Although the actual counts differ than what it turned out to be, the prediction for the president turned out to be correct.
+  
+```{r, message=FALSE, warning=FALSE}
+poll$winner <- ifelse(poll$bidenPercent > poll$trumpPercent, 1, 0)
+poll$region <- tolower(poll$state)
+states <- map_data('state')
+state_win <- data.frame(poll$region, poll$winner)
+state_win2 <- full_join(states, state_win, by = c('region' = 'poll.region'))
+
+ggplot(state_win2, aes(x = long, y = lat)) + 
+  geom_polygon(aes(group = group)) +
+  geom_polygon(state_win2, mapping = aes(x = long, y = lat, group = group, fill = ifelse(state_win2$poll.winner == 1, "#2641c9", "#c92626"))) + 
+  geom_path(aes(group = group), color = 'white') + 
+  scale_fill_manual(labels = c('Biden', 'Trump', ''), values=c("#2641c9", "#c92626")) +
+  coord_map() + 
+  ggtitle('Predicted Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'Predicted State Winner') + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
+```
 
 ## 6.Who has more retweets and favorites for their tweets?
 ```{r}
