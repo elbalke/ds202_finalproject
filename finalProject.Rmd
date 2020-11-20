@@ -26,7 +26,7 @@ library(widyr)
 library(igraph)
 library(ggraph)
 library(data.table)
-
+library(lubridate)
 library(readxl)
 library(expss)
 library(ggrepel)
@@ -76,98 +76,6 @@ bidenHashtags <- search_tweets(
 "#JoeBiden", n = 10000 , retryonratelimit = TRUE
 )
 fwrite(bidenHashtags, file ="joeBiden_TwitterAPI.csv")
-```
-
-```{r}
-jobBiden <- readr::read_csv("./JoeBidenTweets.csv")
-jobBiden = jobBiden %>% select(likes, tweet)
-```
-
-```{r}
-jobBiden$stripped_text1 <- gsub("http.*","",   jobBiden$tweet)
-jobBiden$stripped_text1 <- gsub("https.*","",   jobBiden$tweet)
-jobBidenTweets <- jobBiden$stripped_text1
-head(jobBiden$stripped_text1)
-```
-
-```{r}
-# load list of stop words - from the tidytext package
-data("stop_words")
-# view first 6 words
-head(stop_words)
-```
-
-```{r}
-# remove punctuation, convert to lowercase, add id for each tweet!
-jobBiden_tweets_clean <- jobBiden %>%
-  dplyr::select(stripped_text1) %>%
-  unnest_tokens(word, stripped_text1)
-
-nrow(jobBiden_tweets_clean)
-## [1] 171074
-
-# remove stop words from your list of words
-cleaned_tweet_words <- jobBiden_tweets_clean %>%
-  anti_join(stop_words)
-
-# there should be fewer words now
-nrow(jobBiden_tweets_clean)
-## [1] 171074
-
-# plot the top 15 words -- notice any issues?
-cleaned_tweet_words %>%
-  count(word, sort = TRUE) %>%
-  top_n(35) %>%
-  mutate(word = reorder(word, n)) %>%
-  ggplot(aes(x = word, y = n)) +
-  geom_col(fill = "blue") +
-  xlab(NULL) +
-  coord_flip() +
-      labs(y = "Count",
-      x = "Unique words",
-      title = "Count of unique words found in Joe Biden tweets",
-      subtitle = "Stop words removed from the list", caption = 'Source: Kaggle 171k Tweets')
-```
-```{r}
-donaldTrump <- readr::read_csv("./realdonaldtrump.csv")
-donaldTrump = donaldTrump %>% select(favorites, content)
-
-donaldTrump$stripped_text1 <- gsub("http.*","",   donaldTrump$content)
-donaldTrump$stripped_text1 <- gsub("https.*","",   donaldTrump$content)
-donaldTrumpTweets <- donaldTrump$stripped_text1
-head(jobBiden$stripped_text1)
-```
-
-```{r}
-# remove punctuation, convert to lowercase, add id for each tweet!
-donaldTrump_tweets_clean <- donaldTrump %>%
-  dplyr::select(stripped_text1) %>%
-  unnest_tokens(word, stripped_text1)
-
-nrow(donaldTrump_tweets_clean)
-## [1] 171074
-
-# remove stop words from your list of words
-cleaned_tweet_words <- donaldTrump_tweets_clean %>%
-  anti_join(stop_words)
-
-# there should be fewer words now
-nrow(donaldTrump_tweets_clean)
-## [1] 171074
-
-# plot the top 15 words -- notice any issues?
-cleaned_tweet_words %>%
-  count(word, sort = TRUE) %>%
-  top_n(35) %>%
-  mutate(word = reorder(word, n)) %>%
-  ggplot(aes(x = word, y = n)) +
-  geom_col(fill = "red") +
-  xlab(NULL) +
-  coord_flip() +
-      labs(y = "Count",
-      x = "Unique words",
-      title = "Count of unique words found in Donald Trump tweets",
-      subtitle = "Stop words removed from the list", caption = 'Source: Kaggle 863k Tweets')
 ```
 
 ```{r}
@@ -250,6 +158,62 @@ summarise(sentiment2 = mean(value))
 ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = "blue") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term2,'"'),
 subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
+
+
+```
+```{r}
+pollingData <- readr::read_csv("./president_polls_fivethirtyeight.csv")
+pollingData <- pollingData %>% filter(fte_grade != "NA")
+pollingData <- pollingData %>% filter(fte_grade != "C-")
+pollingData <- pollingData %>% filter(fte_grade != "D")
+pollingData <- pollingData %>% filter(fte_grade != "D-")
+pollingData <- pollingData %>% filter(fte_grade != "F") %>% select(poll_id, state,fte_grade, created_at, candidate_name, pct, sample_size) %>%
+  filter(candidate_name == "Joseph R. Biden Jr." | candidate_name == "Donald Trump")
+
+pollingData$year <- year(as.Date(strptime(pollingData$created_at, "%d/%m/%Y %H:%M")))
+
+joeBidenPolls<- pollingData %>%
+                filter(candidate_name == "Joseph R. Biden Jr.") %>%
+                  summarise(
+                  averagePollPrediction = sprintf("%0.2f",mean(pct))
+                  ) 
+
+donaldTrumpPolls<- pollingData%>%
+                  filter(candidate_name == "Donald Trump") %>%
+                  summarise(
+                  averagePollPrediction = sprintf("%0.2f",mean(pct))
+                  ) 
+
+candidate_name <- c("Biden", "Trump")
+averagePollPrediction <- c(joeBidenPolls$averagePollPrediction, donaldTrumpPolls$averagePollPrediction)
+pollingSamplePrediction <-data.frame(candidate_name, averagePollPrediction)
+
+pollingSamplePrediction$averagePollPrediction <- as.numeric(pollingSamplePrediction$averagePollPrediction)
+
+ggplot(pollingSamplePrediction, aes(x = candidate_name, y = averagePollPrediction, fill = candidate_name)) + geom_bar(stat="identity", position = "dodge") + labs(title = 'Poll Surveys of Candidates since 2018',
+       caption = "Data source: fivethirtyeight 2018-2020") + xlab('Candidate') + ylab('Average Polling Precinct') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=averagePollPrediction), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 100)
+
+
+joeBidenPolls2020<- pollingData %>%
+                filter(candidate_name == "Joseph R. Biden Jr." & year == "20") %>%
+                  summarise(
+                  averagePollPrediction = sprintf("%0.2f",mean(pct))
+                  ) 
+
+donaldTrumpPolls2020<- pollingData%>%
+                  filter(candidate_name == "Donald Trump" & year == "20") %>%
+                  summarise(
+                  averagePollPrediction = sprintf("%0.2f",mean(pct))
+                  ) 
+
+candidate_name <- c("Biden", "Trump")
+averagePollPrediction2020 <- c(joeBidenPolls2020$averagePollPrediction, donaldTrumpPolls2020$averagePollPrediction)
+pollingSamplePrediction2020 <-data.frame(candidate_name, averagePollPrediction2020)
+
+pollingSamplePrediction$averagePollPrediction <- as.numeric(pollingSamplePrediction2020$averagePollPrediction)
+
+ggplot(pollingSamplePrediction, aes(x = candidate_name, y = averagePollPrediction, fill = candidate_name)) + geom_bar(stat="identity", position = "dodge") + labs(title = 'Poll Surveys of Candidates of 2020',
+       caption = "Data source: fivethirtyeight 2020") + xlab('Candidate') + ylab('Average Polling Precinct') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=averagePollPrediction), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 100)
 
 
 ```

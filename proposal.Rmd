@@ -29,9 +29,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ### We will use the following questions for our analysis:
 
 ### 1.What is the current sentiment for Biden and Trump from regular twitter users? Are the tweets positive, netural or negative in sentiment? 
-### 2.What do Biden and Trump most tweet about? 
-### 3.From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
-### 4.Which states are currently republican or democrat?
-### 5.What topics do both canidates talk about?
-### 6.Who has more retweets and favorites for their tweets?
-### 7.What are the common hashtags used between Biden and Trump?
+### 2.From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
+### 3.Which states are currently republican or democrat?
+### 4.What do Biden and Trump most tweet about?
+### 5.Who has more retweets and favorites for their tweets?
+### 6.What are the common hashtags used between Biden and Trump?
