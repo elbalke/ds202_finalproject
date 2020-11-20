@@ -46,7 +46,7 @@ ggplot(state_votes, aes(x = long, y = lat)) +
   geom_path(aes(group = group), color = 'white') + 
   scale_fill_manual(labels = c('Biden/Trump Split', 'Biden', 'Trump', 'Trump/Biden Split', ''), values=c('#617bfa', "#2641c9", "#c92626", '#f07878')) +
   coord_map() + 
-  ggtitle('Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'Total Accidents') + 
+  ggtitle('Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'State Winner') + 
   theme(axis.ticks.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.y = element_blank(),

@@ -71,7 +71,7 @@ ggplot(candidatesTweetData, aes(x = name, y = totalFavorites, fill = name)) + ge
 
 ggplot(candidatesTweetData, aes(x = name, y = averageRetweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Retweets') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageRetweets, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 6400)
 
-ggplot(candidatesTweetData, aes(x = name, y = averageFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageFavorites, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 34000)
+ggplot(candidatesTweetData, aes(x = name, y = averageFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Favorites per Candidate') + xlab('Candidate') + ylab('Average Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageFavorites, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 34000)
 
 candidatesTweetData
 ```
