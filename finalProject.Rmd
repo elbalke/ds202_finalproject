@@ -86,6 +86,10 @@ trumpHashtags$date <- substr(trumpHashtags$created_at,1,10)
 trumpHashtags <- trumpHashtags[trumpHashtags$date == '2020-11-16',]
 print(trumpHashtags)
 ```
+### 1.What is the current sentiment for Biden and Trump from regular twitter users? Are the tweets positive, netural or negative in sentiment? 
+
+    We found that from getting twitter data instantly from the Twitter API on Nov 16 that Biden was more postive in tweets. While Trump was more negative in tweets. This could be from Biden winning the elction and Trump losing the election. 
+
 ```{r}
 by <- 'hour'
 rtweet::ts_plot(trumpHashtags, by = by, trim = 1, col = "red") + geom_point() + 
@@ -165,6 +169,10 @@ x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
 ggsave("bidenTwitterSentiment.png")
 
 ```
+
+### 2.From fivethirtyeight prediction models of the election for 2020. Who is likely to win? "popular vote"
+
+     After cleaning and filtering the fivethirtyeight dataset. We found the Biden is predicted to win in 2020 and also the data from 2020-2018. We filtered the fte_grade to be a C or better because we need reliable data to predicted who wold win for the popular vote
 ```{r}
 pollingData <- readr::read_csv("./president_polls_fivethirtyeight.csv")
 pollingData <- pollingData %>% filter(fte_grade != "NA")
@@ -222,7 +230,7 @@ ggsave("predicted2020.png")
 
 ```
 
-## 3. From fivethirtyeight prediction models of the election for 2020. Who is likely to win?
+### 3.Total Number of Predicted Electoral Votes per Candidate Who is likely to win?
 ```{r}
 bidenElectoralVotes <- poll %>%
                             filter(bidenPercent > trumpPercent)
