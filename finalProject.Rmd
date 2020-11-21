@@ -84,7 +84,7 @@ trumpHashtags <- readr::read_csv("./donaldTrump_TwitterAPI.csv")
 search_term <- "#DonaldTrump"
 trumpHashtags$date <- substr(trumpHashtags$created_at,1,10)
 trumpHashtags <- trumpHashtags[trumpHashtags$date == '2020-11-16',]
-head(trumpHashtags)
+print(trumpHashtags)
 ```
 ```{r}
 by <- 'hour'
@@ -92,6 +92,7 @@ rtweet::ts_plot(trumpHashtags, by = by, trim = 1, col = "red") + geom_point() +
 theme_minimal() + labs(title = paste0('Tweets mentioning "',
 search_term,'" by ',by),
 x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
+ggsave("trumpByHour.png")
 ```
 ```{r}
 sentiment_dataset <- get_sentiments("afinn")
@@ -121,6 +122,7 @@ summarise(sentiment = mean(value))
 ggplot(pivot[-1,], aes(x = hour, y = sentiment)) + geom_line(group = 1, col = "red") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term,'"'),
 subtitle = paste0(pivot$hour[2],' - ',pivot$hour[nrow(pivot)],' on ', format(sentiment$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
+ggsave("trumpTwitterSentiment.png")
 ```
 
 ```{r}
@@ -137,6 +139,7 @@ rtweet::ts_plot(bidenHashtags, by = by, trim = 1,col = "blue") + geom_point() +
 theme_minimal() + labs(title = paste0('Tweets mentioning "',
 search_term2,'" by ',by),
 x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
+ggsave("bidenByHour.png")
 ```
 ```{r}
 sentiment2 <- bidenHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
@@ -159,7 +162,7 @@ summarise(sentiment2 = mean(value))
 ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = "blue") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term2,'"'),
 subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
-
+ggsave("bidenTwitterSentiment.png")
 
 ```
 ```{r}
@@ -193,7 +196,7 @@ pollingSamplePrediction$averagePollPrediction <- as.numeric(pollingSamplePredict
 
 ggplot(pollingSamplePrediction, aes(x = candidate_name, y = averagePollPrediction, fill = candidate_name)) + geom_bar(stat="identity", position = "dodge") + labs(title = 'Poll Surveys of Candidates since 2018',
        caption = "Data source: fivethirtyeight 2018-2020") + xlab('Candidate') + ylab('Average Polling Precinct') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=averagePollPrediction), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 100)
-
+ggsave("predicted2018-2020.png")
 
 joeBidenPolls2020<- pollingData %>%
                 filter(candidate_name == "Joseph R. Biden Jr." & year == "20") %>%
@@ -215,7 +218,7 @@ pollingSamplePrediction$averagePollPrediction <- as.numeric(pollingSamplePredict
 
 ggplot(pollingSamplePrediction, aes(x = candidate_name, y = averagePollPrediction, fill = candidate_name)) + geom_bar(stat="identity", position = "dodge") + labs(title = 'Poll Surveys of Candidates of 2020',
        caption = "Data source: fivethirtyeight 2020") + xlab('Candidate') + ylab('Average Polling Precinct') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=averagePollPrediction), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 100)
-
+ggsave("predicted2020.png")
 
 ```
 
