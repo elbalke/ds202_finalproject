@@ -312,9 +312,15 @@ ggplot(state_votes, aes(x = long, y = lat)) +
 #### Importing Datasets and Loading Stop Words
 
 ```{r, message=FALSE, warning=FALSE}
+<<<<<<< Updated upstream
 biden <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/Data/JoeBidenTweets.csv", stringsAsFactors = FALSE)
 
 trump <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/Data/realdonaldtrump.csv", stringsAsFactors = FALSE)
+=======
+biden <- read.csv("./Data/JoeBidenTweets.csv", stringsAsFactors = FALSE)
+
+trump <- read.csv("./Data/realdonaldtrump.csv", stringsAsFactors = FALSE)
+>>>>>>> Stashed changes
 
 # Loading stop words (irrelevant words such as "is" "are" "the" etc.)
 data("stop_words")
@@ -420,6 +426,10 @@ commonWords %>%
 ```{r}
 bidenTweets <- read.csv("./Data/JoeBidenTweets.csv")
 trumpTweets <- read.csv("./Data/realdonaldtrump.csv")
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 bidenGroup <- bidenTweets %>% summarise(
                           BidenTotalRetweets = sum(bidenTweets$retweets),
                           BidenTotalFavorites = sum(likes),
