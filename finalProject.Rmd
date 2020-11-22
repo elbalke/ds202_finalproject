@@ -161,11 +161,7 @@ summarise(sentiment2 = mean(value))
 ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = "blue") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term2,'"'),
 subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
-<<<<<<< Updated upstream
-ggsave("./Pictures/bidenTwitterSentiment.png")
-=======
 
->>>>>>> Stashed changes
 ```
 
 ### 2.From fivethirtyeight prediction models of the election for 2020. Who is likely to win? "popular vote"
@@ -312,15 +308,15 @@ ggplot(state_votes, aes(x = long, y = lat)) +
 #### Importing Datasets and Loading Stop Words
 
 ```{r, message=FALSE, warning=FALSE}
-<<<<<<< Updated upstream
+
 biden <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/Data/JoeBidenTweets.csv", stringsAsFactors = FALSE)
 
 trump <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/Data/realdonaldtrump.csv", stringsAsFactors = FALSE)
-=======
+
 biden <- read.csv("./Data/JoeBidenTweets.csv", stringsAsFactors = FALSE)
 
 trump <- read.csv("./Data/realdonaldtrump.csv", stringsAsFactors = FALSE)
->>>>>>> Stashed changes
+
 
 # Loading stop words (irrelevant words such as "is" "are" "the" etc.)
 data("stop_words")
@@ -426,10 +422,7 @@ commonWords %>%
 ```{r}
 bidenTweets <- read.csv("./Data/JoeBidenTweets.csv")
 trumpTweets <- read.csv("./Data/realdonaldtrump.csv")
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 bidenGroup <- bidenTweets %>% summarise(
                           BidenTotalRetweets = sum(bidenTweets$retweets),
                           BidenTotalFavorites = sum(likes),
