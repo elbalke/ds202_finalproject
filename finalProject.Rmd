@@ -28,8 +28,6 @@ library(readxl)
 library(expss)
 library(ggrepel)
 library(plotly)
-bidenTweets <- read.csv("./Data/JoeBidenTweets.csv")
-trumpTweets <- read.csv("./Data/realdonaldtrump.csv")
 poll <- read.csv("./Data/statepredictions.csv")
 colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'electoralVotes')
 ```
@@ -167,7 +165,6 @@ ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = 
 subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
 ggsave("./Pictures/bidenTwitterSentiment.png")
-
 ```
 
 ### 2.From fivethirtyeight prediction models of the election for 2020. Who is likely to win? "popular vote"
@@ -255,7 +252,7 @@ state_win2 <- full_join(states, state_win, by = c('region' = 'poll.region'))
 
 ggplot(state_win2, aes(x = long, y = lat)) + 
   geom_polygon(aes(group = group)) +
-  geom_polygon(state_win2, mapping = aes(x = long, y = lat, group = group, fill = ifelse(state_win2$poll.winner == 1, "#2641c9", "#c92626"))) + 
+  geom_polygon(state_win2, mapping = aes(x = long, y = lat, group = group, fill = ifelse(poll.winner == 1, "#2641c9", "#c92626"))) + 
   geom_path(aes(group = group), color = 'white') + 
   scale_fill_manual(labels = c('Biden', 'Trump', ''), values=c("#2641c9", "#c92626")) +
   coord_map() + 
@@ -311,12 +308,12 @@ ggplot(state_votes, aes(x = long, y = lat)) +
         axis.text.y = element_blank())
 ```
 
-## Importing Datasets and Loading Stop Words
+#### Importing Datasets and Loading Stop Words
 
 ```{r, message=FALSE, warning=FALSE}
-biden <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/JoeBidenTweets.csv", stringsAsFactors = FALSE)
+biden <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/Data/JoeBidenTweets.csv", stringsAsFactors = FALSE)
 
-trump <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/realdonaldtrump.csv", stringsAsFactors = FALSE)
+trump <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/Data/realdonaldtrump.csv", stringsAsFactors = FALSE)
 
 # Loading stop words (irrelevant words such as "is" "are" "the" etc.)
 data("stop_words")
@@ -420,6 +417,8 @@ commonWords %>%
 
 ## 6.Who has more retweets and favorites for their tweets?
 ```{r}
+bidenTweets <- read.csv("./Data/JoeBidenTweets.csv")
+trumpTweets <- read.csv("./Data/realdonaldtrump.csv")
 bidenGroup <- bidenTweets %>% summarise(
                           BidenTotalRetweets = sum(bidenTweets$retweets),
                           BidenTotalFavorites = sum(likes),
@@ -451,8 +450,6 @@ ggplot(candidatesTweetData, aes(x = name, y = totalFavorites, fill = name)) + ge
 ggplot(candidatesTweetData, aes(x = name, y = averageRetweets, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Retweets per Candidate') + xlab('Candidate') + ylab('Average Number of Retweets') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageRetweets, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 6400)
 
 ggplot(candidatesTweetData, aes(x = name, y = averageFavorites, fill = name)) + geom_bar(stat="identity", position = "dodge") + ggtitle('Average Number of Favorites per Candidate') + xlab('Candidate') + ylab('Average Number of Favorites') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=round(averageFavorites, digits = 2)), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 34000)
-
-candidatesTweetData
 ```
 
     Based on this data and the graphs, Trump has a significant more amount of retweets and favorites than Biden. However, Trump also has 37,576 more tweets than Biden. We looked into when the data sets were most recently updated and what date range the tweets were collected. The dataset we used for Trump's tweets had tweets from May 4th, 2009 through June 30th, 2020. There are 9 total years in this dataset. The dataset we used for Biden's tweets had tweets from April 9th, 2012 through April 30th, 2020 along with two tweets from 2007. There are 9 total years in this dataset. Although Trump's dataset started earlier, most of the tweets were from 2011 on and since Trump tweets an average of 3,612.67 times a year and Biden tweets an average of 641.78 times a year, I don't think having another year of Biden's tweets would make a big enough of a difference to get the counts closer to each other. Below will be an analyses of the average tweets per year each candidate tweeted. Although Trump has tweeted many more times, he barely has more average retweets per tweet than Biden and Biden actually has more average favorites than Trump.
