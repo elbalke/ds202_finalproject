@@ -1,0 +1,62 @@
+---
+title: "Elisabeth Balke"
+author: "Elisabeth Balke"
+date: "11/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+```
+
+**Create variable lists**
+```{r}
+region <- c("alabama","alaska", "arizona", "arkansas", "california",  "colorado", "connecticut", "delaware",
+            "florida", "georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana",
+           "maine","maryland", "massachusetts", "michigan", "minnesota", "mississippi",
+           "missouri","montana","nebraska","nevada","new hampshire","new jersey","new mexico",
+           "new york","north carolina","north dakota","ohio","oklahoma","oregon","pennsylvania","rhode island",
+           "south carolina","south dakota","tennessee","texas","utah","vermont","virginia",
+           "washington","west virginia","wisconsin","wyoming")
+
+vote <- c(2,2,1,2,1,1,1,1,2,1,1,2,1,2,2,2,2,2,0,1,1,
+          1,1,2,2,2,3,1,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,1,2)
+```
+
+    3 - Nebraska split
+    2 - Trump
+    1 - Biden
+    0 - Maine split
+
+
+**Make data frame**
+```{r, message=FALSE, warning=FALSE}
+states <- map_data('state')
+state_decision <- data.frame(region, vote)
+state_votes <- full_join(states, state_decision)
+```
+
+**Plot Map**
+```{r, message=FALSE, warning=FALSE}
+ggplot(state_votes, aes(x = long, y = lat)) + 
+  geom_polygon(aes(group = group)) +
+  geom_polygon(state_votes, mapping = aes(x = long, y = lat, group = group, fill = factor(vote))) + 
+  geom_path(aes(group = group), color = 'white') + 
+  scale_fill_manual(labels = c('Biden/Trump Split', 'Biden', 'Trump', 'Trump/Biden Split', ''), values=c('#617bfa', "#2641c9", "#c92626", '#f07878')) +
+  coord_map() + 
+  ggtitle('Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'State Winner') + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
+```
+
+    Nebraska split:
+       Trump: 4 Electoral Votes
+       Biden: 1 Electoral Vote
+     
+    Maine Split:
+       Trump: 1 Electoral Vote
+       Biden: 3 Electoral Votes

@@ -9,9 +9,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 options(dplyr.summarise.inform = FALSE)
 options(dplyr.tibble.inform = FALSE)
-```
-
-```{r}
 library (rtweet)
 library(twitteR)
 library(ggplot2)
@@ -31,15 +28,13 @@ library(readxl)
 library(expss)
 library(ggrepel)
 library(plotly)
-bidenTweets <- read.csv("JoeBidenTweets.csv")
-trumpTweets <- read.csv("realdonaldtrump.csv")
-poll <- read.csv("statepredictions.csv")
+bidenTweets <- read.csv("./Data/JoeBidenTweets.csv")
+trumpTweets <- read.csv("./Data/realdonaldtrump.csv")
+poll <- read.csv("./Data/statepredictions.csv")
 colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'electoralVotes')
-
 ```
 
-
-```{r}
+```{r, message=FALSE, warning=FALSE}
 consumer_key <- "Mt2dzgMAOvWqU13zmdtAxovNR"
 consumer_secret <- "1CYFDynCiKvmUikEfZYffHuX1QJwqxNwko4liZmQxVXtj9N7Gk"
 access_token <- "1095430370198208512-1IyFwJEHPJpFVbGinTarjXapjQjxV3"
@@ -50,12 +45,13 @@ setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_token_se
 
 account <- "realdonaldtrump"
 account.timeline <- userTimeline(account, n=10, includeRts = TRUE)
-
 ```
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 print(account.timeline)
 ```
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 app_name ="Kordell's app to connect to R"
 create_token(app = app_name,
              consumer_key = consumer_key,
@@ -64,45 +60,48 @@ create_token(app = app_name,
              access_secret = access_token_secret)
 ```
 
-```{r eval = FALSE, echo = FALSE}
+```{r eval = FALSE, echo = FALSE, message=FALSE, warning=FALSE}
 
 trumpHashtags <- search_tweets(
 "#DonaldTrump", n = 10000 , retryonratelimit = TRUE
 )
-fwrite(trumpHashtags, file ="donaldTrump_TwitterAPI.csv")
+fwrite(trumpHashtags, file ="./Data/donaldTrump_TwitterAPI.csv")
 ```
 
-```{r eval = FALSE, echo = FALSE}
+```{r eval = FALSE, echo = FALSE, message=FALSE, warning=FALSE}
 bidenHashtags <- search_tweets(
 "#JoeBiden", n = 10000 , retryonratelimit = TRUE
 )
-fwrite(bidenHashtags, file ="joeBiden_TwitterAPI.csv")
+fwrite(bidenHashtags, file ="./Data/joeBiden_TwitterAPI.csv")
 ```
 
-```{r}
-trumpHashtags <- readr::read_csv("./donaldTrump_TwitterAPI.csv")
+```{r, message=FALSE, warning=FALSE}
+trumpHashtags <- readr::read_csv("./Data/donaldTrump_TwitterAPI.csv")
 search_term <- "#DonaldTrump"
 trumpHashtags$date <- substr(trumpHashtags$created_at,1,10)
 trumpHashtags <- trumpHashtags[trumpHashtags$date == '2020-11-16',]
 print(trumpHashtags)
 ```
+
 ### 1.What is the current sentiment for Biden and Trump from regular twitter users? Are the tweets positive, netural or negative in sentiment? 
 
     We found that from getting twitter data instantly from the Twitter API on Nov 16 that Biden was more postive in tweets. While Trump was more negative in tweets. This could be from Biden winning the elction and Trump losing the election. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 by <- 'hour'
 rtweet::ts_plot(trumpHashtags, by = by, trim = 1, col = "red") + geom_point() + 
 theme_minimal() + labs(title = paste0('Tweets mentioning "',
 search_term,'" by ',by),
 x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
-ggsave("trumpByHour.png")
+ggsave("./Pictures/trumpByHour.png")
 ```
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 sentiment_dataset <- get_sentiments("afinn")
 sentiment_dataset <- arrange(sentiment_dataset, value)
 ```
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 sentiment <- trumpHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
 
 sentiment_dataset <- get_sentiments("afinn")
@@ -126,26 +125,27 @@ summarise(sentiment = mean(value))
 ggplot(pivot[-1,], aes(x = hour, y = sentiment)) + geom_line(group = 1, col = "red") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term,'"'),
 subtitle = paste0(pivot$hour[2],' - ',pivot$hour[nrow(pivot)],' on ', format(sentiment$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
-ggsave("trumpTwitterSentiment.png")
+ggsave("./Pictures/trumpTwitterSentiment.png")
 ```
 
-```{r}
-bidenHashtags <-  readr::read_csv("./joeBiden_TwitterAPI.csv")
+```{r, message=FALSE, warning=FALSE}
+bidenHashtags <-  readr::read_csv("./Data/joeBiden_TwitterAPI.csv")
 search_term2 <- "#JoeBiden"
 bidenHashtags$date <- substr(bidenHashtags$created_at,1,10)
 bidenHashtags <- bidenHashtags[bidenHashtags$date == '2020-11-16',]
 head(bidenHashtags)
 ```
-```{r}
 
+```{r, message=FALSE, warning=FALSE}
 by <- 'hour'
 rtweet::ts_plot(bidenHashtags, by = by, trim = 1,col = "blue") + geom_point() + 
 theme_minimal() + labs(title = paste0('Tweets mentioning "',
 search_term2,'" by ',by),
 x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
-ggsave("bidenByHour.png")
+ggsave("./Pictures/bidenByHour.png")
 ```
-```{r}
+
+```{r, message=FALSE, warning=FALSE}
 sentiment2 <- bidenHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
 
 #merge
@@ -166,15 +166,15 @@ summarise(sentiment2 = mean(value))
 ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = "blue") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term2,'"'),
 subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
 x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
-ggsave("bidenTwitterSentiment.png")
+ggsave("./Pictures/bidenTwitterSentiment.png")
 
 ```
 
 ### 2.From fivethirtyeight prediction models of the election for 2020. Who is likely to win? "popular vote"
 
      After cleaning and filtering the fivethirtyeight dataset. We found the Biden is predicted to win in 2020 and also the data from 2020-2018. We filtered the fte_grade to be a C or better because we need reliable data to predicted who wold win for the popular vote
-```{r}
-pollingData <- readr::read_csv("./president_polls_fivethirtyeight.csv")
+```{r, message=FALSE, warning=FALSE}
+pollingData <- readr::read_csv("./Data/president_polls_fivethirtyeight.csv")
 pollingData <- pollingData %>% filter(fte_grade != "NA")
 pollingData <- pollingData %>% filter(fte_grade != "C-")
 pollingData <- pollingData %>% filter(fte_grade != "D")
@@ -204,7 +204,7 @@ pollingSamplePrediction$averagePollPrediction <- as.numeric(pollingSamplePredict
 
 ggplot(pollingSamplePrediction, aes(x = candidate_name, y = averagePollPrediction, fill = candidate_name)) + geom_bar(stat="identity", position = "dodge") + labs(title = 'Poll Surveys of Candidates since 2018',
        caption = "Data source: fivethirtyeight 2018-2020") + xlab('Candidate') + ylab('Average Polling Precinct') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=averagePollPrediction), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 100)
-ggsave("predicted2018-2020.png")
+ggsave("./Pictures/predicted2018-2020.png")
 
 joeBidenPolls2020<- pollingData %>%
                 filter(candidate_name == "Joseph R. Biden Jr." & year == "20") %>%
@@ -226,12 +226,12 @@ pollingSamplePrediction$averagePollPrediction <- as.numeric(pollingSamplePredict
 
 ggplot(pollingSamplePrediction, aes(x = candidate_name, y = averagePollPrediction, fill = candidate_name)) + geom_bar(stat="identity", position = "dodge") + labs(title = 'Poll Surveys of Candidates of 2020',
        caption = "Data source: fivethirtyeight 2020") + xlab('Candidate') + ylab('Average Polling Precinct') + scale_fill_manual("legend", values = c("Biden" = "#2641c9", "Trump" = "#c92626")) + geom_text(aes(label=averagePollPrediction), position=position_dodge(width=0.9), vjust=-0.25, size = 6) + ylim(0, 100)
-ggsave("predicted2020.png")
+ggsave("./Pictures/predicted2020.png")
 
 ```
 
-### 3.Total Number of Predicted Electoral Votes per Candidate Who is likely to win?
-```{r}
+### 3. From kcore-analytics prediction models of the election for 2020. Who is likely to win?
+```{r, message=FALSE, warning=FALSE}
 bidenElectoralVotes <- poll %>%
                             filter(bidenPercent > trumpPercent)
 trumpElectoralVotes <- poll %>%
@@ -245,6 +245,178 @@ ggplot(candidatePredictions, aes(x = name, y = totalVotes, fill = name)) + geom_
 ```
 
     By this graph, we can predict that Biden is likely to win 277-261 votes. Although the actual counts differ than what it turned out to be, the prediction for the president turned out to be correct.
+  
+```{r, message=FALSE, warning=FALSE}
+poll$winner <- ifelse(poll$bidenPercent > poll$trumpPercent, 1, 0)
+poll$region <- tolower(poll$state)
+states <- map_data('state')
+state_win <- data.frame(poll$region, poll$winner)
+state_win2 <- full_join(states, state_win, by = c('region' = 'poll.region'))
+
+ggplot(state_win2, aes(x = long, y = lat)) + 
+  geom_polygon(aes(group = group)) +
+  geom_polygon(state_win2, mapping = aes(x = long, y = lat, group = group, fill = ifelse(state_win2$poll.winner == 1, "#2641c9", "#c92626"))) + 
+  geom_path(aes(group = group), color = 'white') + 
+  scale_fill_manual(labels = c('Biden', 'Trump', ''), values=c("#2641c9", "#c92626")) +
+  coord_map() + 
+  ggtitle('Predicted Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'Predicted State Winner') + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
+```
+    
+    Based off of this map, we can tell that the states each candidate is predicted to win is pretty similar to what they normally are. However, Biden is predicted to flip some states out west, in the midwest, and a couple of states in the east.
+    
+### 4. What States are Currently Republican or Democrat?
+
+```{r, message=FALSE, warning=FALSE}
+# Creating variable lists
+region <- c("alabama","alaska", "arizona", "arkansas", "california",  "colorado", "connecticut", "delaware",
+            "florida", "georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana",
+           "maine","maryland", "massachusetts", "michigan", "minnesota", "mississippi",
+           "missouri","montana","nebraska","nevada","new hampshire","new jersey","new mexico",
+           "new york","north carolina","north dakota","ohio","oklahoma","oregon","pennsylvania","rhode island",
+           "south carolina","south dakota","tennessee","texas","utah","vermont","virginia",
+           "washington","west virginia","wisconsin","wyoming")
+
+vote <- c(2,2,1,2,1,1,1,1,2,1,1,2,1,2,2,2,2,2,0,1,1,
+          1,1,2,2,2,3,1,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,1,2)
+```
+
+    3 - Nebraska split
+    2 - Trump
+    1 - Biden
+    0 - Maine split
+
+```{r, message=FALSE, warning=FALSE}
+# Making the map
+state_decision <- data.frame(region, vote)
+state_votes <- full_join(states, state_decision)
+```
+
+    Shown above are the states each candidate won during this election. Looking back at the predicted map, you can see that the predicted map was pretty similar to what the outcome actually ended up being.
+
+```{r, message=FALSE, warning=FALSE}
+ggplot(state_votes, aes(x = long, y = lat)) + 
+  geom_polygon(aes(group = group)) +
+  geom_polygon(state_votes, mapping = aes(x = long, y = lat, group = group, fill = factor(vote))) + 
+  geom_path(aes(group = group), color = 'white') + 
+  scale_fill_manual(labels = c('Biden/Trump Split', 'Biden', 'Trump', 'Trump/Biden Split', ''), values=c('#617bfa', "#2641c9", "#c92626", '#f07878')) +
+  coord_map() + 
+  ggtitle('Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'Total Accidents') + 
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
+```
+
+## Importing Datasets and Loading Stop Words
+
+```{r, message=FALSE, warning=FALSE}
+biden <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/JoeBidenTweets.csv", stringsAsFactors = FALSE)
+
+trump <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/realdonaldtrump.csv", stringsAsFactors = FALSE)
+
+# Loading stop words (irrelevant words such as "is" "are" "the" etc.)
+data("stop_words")
+```
+
+### 5. What topics do both canidates talk about?
+
+#### Biden Topics
+
+```{r, message=FALSE, warning=FALSE}
+# Removing punctuation from tweets
+biden$cleanTxt <- gsub("http.*","",   biden$tweet)
+biden$cleanTxt <- gsub("https.*","",   biden$tweet)
+bidenTweets <- biden$cleanTxt
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Breaking tweets into words and removing stop words
+cleanedBidenTweets <- biden %>%
+  dplyr::select(cleanTxt) %>%
+  unnest_tokens(word, cleanTxt)
+
+cleanedBidenWords <- cleanedBidenTweets %>%
+  anti_join(stop_words)
+
+# Removing non-words
+cleanedBidenWords2 <- subset(cleanedBidenWords, word!="http" & word!="t.co")
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Visualizing most common words
+cleanedBidenWords2 %>%
+  count(word, sort = TRUE) %>%
+  top_n(20) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "blue") +
+  coord_flip() +
+  ggtitle("Most Common Words in Joe Biden Tweets") + 
+  xlab("Word") +
+  ylab("Count")
+```
+
+#### Trump Topics
+
+```{r, message=FALSE, warning=FALSE}
+# Removing punctuation from tweets
+trump$cleanTxt <- gsub("http.*","",   trump$content)
+trump$cleanTxt <- gsub("https.*","",   trump$content)
+trumpTweets <- trump$cleanTxt
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Breaking tweets into words and removing stop words
+cleanedTrumpTweets <- trump %>%
+  dplyr::select(cleanTxt) %>%
+  unnest_tokens(word, cleanTxt)
+
+cleanedTrumpWords <- cleanedTrumpTweets %>%
+  anti_join(stop_words)
+
+# Removing non-words
+cleanedTrumpWords2 <- subset(cleanedTrumpWords, word!="http" & word!="pic.twitter.com" & word!="bit.ly")
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Visualizing most common words
+cleanedTrumpWords2 %>%
+  count(word, sort = TRUE) %>%
+  top_n(20) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "red") +
+  coord_flip() +
+  ggtitle("Most Common Words in Donald Trump Tweets") + 
+  xlab("Word") +
+  ylab("Count")
+```
+
+#### Common Topics
+
+```{r, message=FALSE, warning=FALSE}
+# Finding common topics using inner_join
+commonWords <- inner_join(cleanedBidenWords2, cleanedTrumpWords2, by = "word")
+```
+
+```{r, message=FALSE, warning=FALSE}
+# Visualizing common topics
+commonWords %>%
+  count(word, sort = TRUE) %>%
+  top_n(10) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "purple") +
+  ggtitle("Common Topics Between Biden and Trump") + 
+  xlab("Topic") +
+  ylab("Count")
+```
+
+    From this bar chart we can identify two major topics that both Biden and Trump are tweeting about.  The most talked about topic is Donald Trump.  Trump likes to talk about himself and Biden often criticizes him, so it's no surprise the words "trump" and "donald" rank 1st and 3rd respectively.  The next major topic both people talk about is the president.  The data for Biden's tweets begins in 2007 and Trump's begins in 2009, so the topic of president has changed over time.
 
 ## 6.Who has more retweets and favorites for their tweets?
 ```{r}
@@ -316,158 +488,4 @@ ggplot(top5Hashtags, aes(x = hashtag, y = timesUsed, fill = hashtag)) + geom_bar
 ```
 
     Based off of these findings, it seems like the majority of commonalities between the two candidates' hashtag usage is that most of them seem to either be a holiday, a day celebrating a person or group of people, standing in solidarity after a tragedy (for example #VegasStrong), or an election. Although #DemDebate is the most popular hashtag, with over 220 usages between the two candidates, Biden has used that hashtag 201 times so he has used it a majority of the time.
-    
-
-**Create variable lists**
-```{r}
-region <- c("alabama","alaska", "arizona", "arkansas", "california",  "colorado", "connecticut", "delaware",
-            "florida", "georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky","louisiana",
-           "maine","maryland", "massachusetts", "michigan", "minnesota", "mississippi",
-           "missouri","montana","nebraska","nevada","new hampshire","new jersey","new mexico",
-           "new york","north carolina","north dakota","ohio","oklahoma","oregon","pennsylvania","rhode island",
-           "south carolina","south dakota","tennessee","texas","utah","vermont","virginia",
-           "washington","west virginia","wisconsin","wyoming")
-
-vote <- c(2,2,1,2,1,1,1,1,2,1,1,2,1,2,2,2,2,2,0,1,1,
-          1,1,2,2,2,3,1,1,1,1,1,2,2,2,2,1,1,1,2,2,2,2,2,1,1,1,2,1,2)
-```
-
-    3 - Nebraska split
-    2 - Trump
-    1 - Biden
-    0 - Maine split
-
-
-**Make data frame**
-```{r, message=FALSE, warning=FALSE}
-states <- map_data('state')
-state_decision <- data.frame(region, vote)
-state_votes <- full_join(states, state_decision)
-```
-
-**Plot Map**
-```{r, message=FALSE, warning=FALSE}
-ggplot(state_votes, aes(x = long, y = lat)) + 
-  geom_polygon(aes(group = group)) +
-  geom_polygon(state_votes, mapping = aes(x = long, y = lat, group = group, fill = factor(vote))) + 
-  geom_path(aes(group = group), color = 'white') + 
-  scale_fill_manual(labels = c('Biden/Trump Split', 'Biden', 'Trump', 'Trump/Biden Split', ''), values=c('#617bfa', "#2641c9", "#c92626", '#f07878')) +
-  coord_map() + 
-  ggtitle('Voted Political Party by State') + xlab('') + ylab('') + labs(fill = 'Total Accidents') + 
-  theme(axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank())
-```
-
-
-## Importing Datasets and Loading Stop Words
-
-```{r}
-biden <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/JoeBidenTweets.csv", stringsAsFactors = FALSE)
-
-trump <- read.csv("https://raw.githubusercontent.com/elbalke/ds202_finalproject/main/realdonaldtrump.csv", stringsAsFactors = FALSE)
-
-# Loading stop words (irrelevant words such as "is" "are" "the" etc.)
-data("stop_words")
-```
-
-## 5. What topics do both canidates talk about?
-
-### Biden Topics
-
-```{r}
-# Removing punctuation from tweets
-biden$cleanTxt <- gsub("http.*","",   biden$tweet)
-biden$cleanTxt <- gsub("https.*","",   biden$tweet)
-bidenTweets <- biden$cleanTxt
-```
-
-```{r, message = FALSE}
-# Breaking tweets into words and removing stop words
-cleanedBidenTweets <- biden %>%
-  dplyr::select(cleanTxt) %>%
-  unnest_tokens(word, cleanTxt)
-
-cleanedBidenWords <- cleanedBidenTweets %>%
-  anti_join(stop_words)
-
-# Removing non-words
-cleanedBidenWords2 <- subset(cleanedBidenWords, word!="http" & word!="t.co")
-```
-
-```{r, message = FALSE}
-# Visualizing most common words
-cleanedBidenWords2 %>%
-  count(word, sort = TRUE) %>%
-  top_n(20) %>%
-  mutate(word = reorder(word, n)) %>%
-  ggplot(aes(x = word, y = n)) +
-  geom_col(fill = "blue") +
-  coord_flip() +
-  ggtitle("Most Common Words in Joe Biden Tweets") + 
-  xlab("Word") +
-  ylab("Count")
-```
-
-
-### Trump Topics
-
-```{r}
-# Removing punctuation from tweets
-trump$cleanTxt <- gsub("http.*","",   trump$content)
-trump$cleanTxt <- gsub("https.*","",   trump$content)
-trumpTweets <- trump$cleanTxt
-```
-
-```{r, message = FALSE}
-# Breaking tweets into words and removing stop words
-cleanedTrumpTweets <- trump %>%
-  dplyr::select(cleanTxt) %>%
-  unnest_tokens(word, cleanTxt)
-
-cleanedTrumpWords <- cleanedTrumpTweets %>%
-  anti_join(stop_words)
-
-# Removing non-words
-cleanedTrumpWords2 <- subset(cleanedTrumpWords, word!="http" & word!="pic.twitter.com" & word!="bit.ly")
-```
-
-```{r, message = FALSE}
-# Visualizing most common words
-cleanedTrumpWords2 %>%
-  count(word, sort = TRUE) %>%
-  top_n(20) %>%
-  mutate(word = reorder(word, n)) %>%
-  ggplot(aes(x = word, y = n)) +
-  geom_col(fill = "red") +
-  coord_flip() +
-  ggtitle("Most Common Words in Donald Trump Tweets") + 
-  xlab("Word") +
-  ylab("Count")
-```
-
-### Common Topics
-
-```{r}
-# Finding common topics using inner_join
-commonWords <- inner_join(cleanedBidenWords2, cleanedTrumpWords2, by = "word")
-```
-
-```{r, message = FALSE}
-# Visualizing common topics
-commonWords %>%
-  count(word, sort = TRUE) %>%
-  top_n(10) %>%
-  mutate(word = reorder(word, n)) %>%
-  ggplot(aes(x = word, y = n)) +
-  geom_col(fill = "purple") +
-  ggtitle("Common Topics Between Biden and Trump") + 
-  xlab("Topic") +
-  ylab("Count")
-```
-
-    From this bar chart we can identify two major topics that both Biden and Trump are tweeting about.  The most talked about topic is Donald Trump.  Trump likes to talk about himself and Biden often criticizes him, so it's no surprise the words "trump" and "donald" rank 1st and 3rd respectively.  The next major topic both people talk about is the president.  The data for Biden's tweets begins in 2007 and Trump's begins in 2009, so the topic of president has changed over time.
-   
-   
    

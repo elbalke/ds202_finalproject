@@ -1,0 +1,244 @@
+---
+title: "kordellschrock"
+author: "Kordell Schrock"
+date: "11/16/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library (rtweet)
+library(twitteR)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(tidytext)
+library(textdata)
+#The get_sentiments function returns a tibble, so to take a look at what is included as “positive” and “negative” sentiment, you will need to filter. from 
+library(widyr)
+library(igraph)
+library(ggraph)
+library(data.table)
+
+```
+
+
+```{r}
+consumer_key <- "Mt2dzgMAOvWqU13zmdtAxovNR"
+consumer_secret <- "1CYFDynCiKvmUikEfZYffHuX1QJwqxNwko4liZmQxVXtj9N7Gk"
+access_token <- "1095430370198208512-1IyFwJEHPJpFVbGinTarjXapjQjxV3"
+access_token_secret <- "5McWrmhfBedpJMHZSDqoTMk9sGYLqrxv4MuZB0w132mIp"
+
+#Create Twitter Connection
+setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_token_secret)
+
+account <- "realdonaldtrump"
+account.timeline <- userTimeline(account, n=10, includeRts = TRUE)
+
+```
+```{r}
+print(account.timeline)
+```
+```{r}
+app_name ="Kordell's app to connect to R"
+create_token(app = app_name,
+             consumer_key = consumer_key,
+             consumer_secret = consumer_secret,
+             access_token = access_token,
+             access_secret = access_token_secret)
+```
+
+
+```{r}
+jobBiden <- readr::read_csv("./JoeBidenTweets.csv")
+jobBiden = jobBiden %>% select(likes, tweet)
+```
+
+```{r}
+jobBiden$stripped_text1 <- gsub("http.*","",   jobBiden$tweet)
+jobBiden$stripped_text1 <- gsub("https.*","",   jobBiden$tweet)
+jobBidenTweets <- jobBiden$stripped_text1
+head(jobBiden$stripped_text1)
+```
+
+```{r}
+# load list of stop words - from the tidytext package
+data("stop_words")
+# view first 6 words
+head(stop_words)
+```
+
+```{r}
+# remove punctuation, convert to lowercase, add id for each tweet!
+jobBiden_tweets_clean <- jobBiden %>%
+  dplyr::select(stripped_text1) %>%
+  unnest_tokens(word, stripped_text1)
+
+nrow(jobBiden_tweets_clean)
+## [1] 171074
+
+# remove stop words from your list of words
+cleaned_tweet_words <- jobBiden_tweets_clean %>%
+  anti_join(stop_words)
+
+# there should be fewer words now
+nrow(jobBiden_tweets_clean)
+## [1] 171074
+
+# plot the top 15 words -- notice any issues?
+cleaned_tweet_words %>%
+  count(word, sort = TRUE) %>%
+  top_n(35) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "blue") +
+  xlab(NULL) +
+  coord_flip() +
+      labs(y = "Count",
+      x = "Unique words",
+      title = "Count of unique words found in Joe Biden tweets",
+      subtitle = "Stop words removed from the list", caption = 'Source: Kaggle 171k Tweets')
+```
+```{r}
+donaldTrump <- readr::read_csv("./realdonaldtrump.csv")
+donaldTrump = donaldTrump %>% select(favorites, content)
+
+donaldTrump$stripped_text1 <- gsub("http.*","",   donaldTrump$content)
+donaldTrump$stripped_text1 <- gsub("https.*","",   donaldTrump$content)
+donaldTrumpTweets <- donaldTrump$stripped_text1
+head(jobBiden$stripped_text1)
+```
+
+```{r}
+# remove punctuation, convert to lowercase, add id for each tweet!
+donaldTrump_tweets_clean <- donaldTrump %>%
+  dplyr::select(stripped_text1) %>%
+  unnest_tokens(word, stripped_text1)
+
+nrow(donaldTrump_tweets_clean)
+## [1] 171074
+
+# remove stop words from your list of words
+cleaned_tweet_words <- donaldTrump_tweets_clean %>%
+  anti_join(stop_words)
+
+# there should be fewer words now
+nrow(donaldTrump_tweets_clean)
+## [1] 171074
+
+# plot the top 15 words -- notice any issues?
+cleaned_tweet_words %>%
+  count(word, sort = TRUE) %>%
+  top_n(35) %>%
+  mutate(word = reorder(word, n)) %>%
+  ggplot(aes(x = word, y = n)) +
+  geom_col(fill = "red") +
+  xlab(NULL) +
+  coord_flip() +
+      labs(y = "Count",
+      x = "Unique words",
+      title = "Count of unique words found in Donald Trump tweets",
+      subtitle = "Stop words removed from the list", caption = 'Source: Kaggle 863k Tweets')
+```
+
+
+```{r eval = FALSE, echo = FALSE}
+
+trumpHashtags <- search_tweets(
+"#DonaldTrump", n = 10000 , retryonratelimit = TRUE
+)
+fwrite(trumpHashtags, file ="donaldTrump_TwitterAPI.csv")
+```
+```{r}
+trumpHashtags <- readr::read_csv("./donaldTrump_TwitterAPI.csv")
+search_term <- "#DonaldTrump"
+trumpHashtags$date <- substr(trumpHashtags$created_at,1,10)
+trumpHashtags <- trumpHashtags[trumpHashtags$date == '2020-11-16',]
+head(trumpHashtags)
+```
+```{r}
+by <- 'hour'
+rtweet::ts_plot(trumpHashtags, by = by, trim = 1, col = "red") + geom_point() + 
+theme_minimal() + labs(title = paste0('Tweets mentioning "',
+search_term,'" by ',by),
+x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
+```
+```{r}
+sentiment_dataset <- get_sentiments("afinn")
+sentiment_dataset <- arrange(sentiment_dataset, value)
+```
+```{r}
+sentiment <- trumpHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
+
+sentiment_dataset <- get_sentiments("afinn")
+sentiment_dataset <- arrange(sentiment_dataset, -value)
+
+#merge
+sentiment <- merge(sentiment, sentiment_dataset, by = 'word')
+
+#clean
+sentiment$word <- NULL
+sentiment$screen_name <- NULL
+
+#get nearest hour of time for plot
+sentiment$hour <- format(round(sentiment$created_at, units="hours"), format="%H:%M")
+
+pivot <- sentiment %>%
+group_by(hour) %>%
+summarise(sentiment = mean(value))
+
+#plot
+ggplot(pivot[-1,], aes(x = hour, y = sentiment)) + geom_line(group = 1, col = "red") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term,'"'),
+subtitle = paste0(pivot$hour[2],' - ',pivot$hour[nrow(pivot)],' on ', format(sentiment$created_at[1], '%d %B %Y')),
+x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
+```
+```{r eval = FALSE, echo = FALSE}
+bidenHashtags <- search_tweets(
+"#JoeBiden", n = 10000 , retryonratelimit = TRUE
+)
+fwrite(bidenHashtags, file ="joeBiden_TwitterAPI.csv")
+```
+```{r}
+bidenHashtags <-  readr::read_csv("./joeBiden_TwitterAPI.csv")
+search_term2 <- "#JoeBiden"
+bidenHashtags$date <- substr(bidenHashtags$created_at,1,10)
+bidenHashtags <- bidenHashtags[bidenHashtags$date == '2020-11-16',]
+head(bidenHashtags)
+```
+```{r}
+
+by <- 'hour'
+rtweet::ts_plot(bidenHashtags, by = by, trim = 1,col = "blue") + geom_point() + 
+theme_minimal() + labs(title = paste0('Tweets mentioning "',
+search_term2,'" by ',by),
+x = 'Date', y = 'Count', caption = 'Source: Twitter API 10k Tweets')
+```
+```{r}
+sentiment2 <- bidenHashtags[,3:5] %>% unnest_tokens(output = 'word', input = 'text')
+
+#merge
+sentiment2 <- merge(sentiment2, sentiment_dataset, by = 'word')
+
+#clean
+sentiment2$word <- NULL
+sentiment2$screen_name <- NULL
+
+#get nearest hour of time for plot
+sentiment2$hour <- format(round(sentiment2$created_at, units="hours"), format="%H:%M")
+
+pivot2 <- sentiment2 %>%
+group_by(hour) %>%
+summarise(sentiment2 = mean(value))
+
+#plot
+ggplot(pivot2[-1,], aes(x = hour, y = sentiment2)) + geom_line(group = 1, col = "blue") + geom_point() + geom_hline(yintercept=0) + theme_minimal() + labs(title = paste0('Average sentiment of tweetings mentioning "',search_term2,'"'),
+subtitle = paste0(pivot2$hour[2],' - ',pivot2$hour[nrow(pivot2)],' on ', format(sentiment2$created_at[1], '%d %B %Y')),
+x = 'Date', y = 'Sentiment', caption = 'Source: Twitter API 10k Tweets')
+
+
+```
+
+
