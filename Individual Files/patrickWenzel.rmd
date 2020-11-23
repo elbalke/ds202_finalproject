@@ -17,14 +17,14 @@ library(tidyverse)
 library(readxl)
 library(expss)
 library(ggrepel)
-bidenTweets <- read.csv("JoeBidenTweets.csv")
-trumpTweets <- read.csv("realdonaldtrump.csv")
-poll <- read.csv("statepredictions.csv")
+bidenTweets <- read.csv("../Data/JoeBidenTweets.csv")
+trumpTweets <- read.csv("../Data/realdonaldtrump.csv")
+poll <- read.csv("../Data/statepredictions.csv")
 colnames(poll) <- c('state', 'trumpPercent', 'bidenPercent', 'otherPercent', 'electoralVotes')
 ```
 
 ### 3. From kcore-analytics prediction models of the election for 2020. Who is likely to win?
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 bidenElectoralVotes <- poll %>%
                             filter(bidenPercent > trumpPercent)
 trumpElectoralVotes <- poll %>%
@@ -39,7 +39,7 @@ ggplot(candidatePredictions, aes(x = name, y = totalVotes, fill = name)) + geom_
 
     By this graph, we can predict that Biden is likely to win 277-261 votes. Although the actual counts differ than what it turned out to be, the prediction for the president turned out to be correct.
   
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 poll$winner <- ifelse(poll$bidenPercent > poll$trumpPercent, 1, 0)
 poll$region <- tolower(poll$state)
 states <- map_data('state')
@@ -62,7 +62,7 @@ ggplot(state_win2, aes(x = long, y = lat)) +
     Based off of this map, we can tell that the states each candidate is predicted to win is pretty similar to what they normally are. However, Biden is predicted to flip some states out west, in the midwest, and a couple of states in the east.
 
 ## 6.Who has more retweets and favorites for their tweets?
-```{r}
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 bidenGroup <- bidenTweets %>% summarise(
                           BidenTotalRetweets = sum(bidenTweets$retweets),
                           BidenTotalFavorites = sum(likes),
@@ -102,13 +102,15 @@ candidatesTweetData
 
 ## 7.What are the common hashtags used between Biden and Trump?
 
-```{r}
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 trumpHashtags <- unlist(strsplit(trumpTweets$hashtags, ','))
 trumpHashtags <- tibble(trumpHashtags)
 allTrumpHashtags <- trumpHashtags
 trumpHashtags <- unique(trumpHashtags$trumpHashtags)
 trumpHashtags <- tibble(trumpHashtags)
+```
 
+```{r, message=FALSE, warning=FALSE, echo = FALSE}
 bidenHashtags <- unlist(strsplit(bidenTweets$hashtags, ','))
 bidenHashtags <- tibble(bidenHashtags)
 allBidenHashtags <- bidenHashtags
